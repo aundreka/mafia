@@ -93,6 +93,26 @@ upgrade screen.
 5. **Realtime Database → Rules** tab → paste the contents of
    [database.rules.json](database.rules.json) → **Publish**.
 
+> ### ⚠️ Step 5 is not optional
+>
+> Firebase's "Start in test mode" leaves rules at `".read": true, ".write": true`,
+> which means **anyone on the internet can read every room and delete the whole
+> database** — no login, just one HTTP request. Test mode is also set to expire
+> on its own, at which point the app stops working with no warning.
+>
+> Publishing [database.rules.json](database.rules.json) fixes both: it scopes
+> every read and write to a single four-character room node, so you have to
+> know a code to touch anything, and it never expires.
+>
+> To check what you have live right now, run:
+>
+> ```bash
+> curl 'https://YOUR-PROJECT-default-rtdb.firebaseio.com/.json?shallow=true'
+> ```
+>
+> If that returns your data instead of `Permission denied`, the rules are still
+> wide open.
+
 **If step 5 is skipped**, the app can reach Firebase but the rules refuse to
 answer. It waits 8 seconds, gives up, and drops to local mode with a red
 **⚠️ OFFLINE — other phones will not see your room** banner plus a toast naming
