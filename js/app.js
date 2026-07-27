@@ -295,6 +295,12 @@ async function enterRoom(code) {
   lastRound = null;
   history.replaceState(null, '', `#${code}`);
 
+  // Paint the code before the first snapshot lands — otherwise the host
+  // stares at the placeholder dots for as long as the round trip takes.
+  $('#lobby-code').textContent = code;
+  $('#gm-code').textContent = code;
+  $('#lobby-count').textContent = 'Connecting…';
+
   watchDisconnect(code, me.id);
   unsubscribe?.();
   unsubscribe = subscribeRoom(code, onRoomChange);
