@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#4FB8F0" />
+<title>Party Night — Mafia &amp; Spyfall</title>
+<meta name="description" content="Cute party games. Make a room, share the code, everyone gets a secret role." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>" />
+</head>
+<body>
+
+<!-- floating sparkle field -->
+<div class="sky" aria-hidden="true">
+  <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span>
+  <span class="spark s4"></span><span class="spark s5"></span><span class="spark s6"></span>
+  <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span>
+</div>
+
+<div id="mode-flag" class="mode-flag" hidden></div>
+
+<main id="app">
+
+  <!-- ─────────────────────────  HOME  ───────────────────────── -->
+  <section class="screen is-active" id="screen-home">
+    <div class="stack">
+      <div class="logo">
+        <div class="logo-mask" id="logo-emoji">🎭</div>
+        <h1 class="logo-word">PARTY<span>NIGHT</span></h1>
+        <p class="tagline">Secret roles for your whole crew</p>
+      </div>
+
+      <div class="game-picker" id="game-picker">
+        <button class="game-tile is-picked" data-game="mafia">
+          <span class="game-emoji">🎭</span>
+          <span class="game-name">Mafia</span>
+          <span class="game-tag">Find the killers</span>
+          <span class="game-players">4–20 players</span>
+        </button>
+        <button class="game-tile" data-game="spyfall">
+          <span class="game-emoji">🕵️</span>
+          <span class="game-name">Spyfall</span>
+          <span class="game-tag">Guess the place</span>
+          <span class="game-players">3–20 players</span>
+        </button>
+      </div>
+
+      <div class="card">
+        <label class="field">
+          <span class="field-label">What's your name?</span>
+          <input id="input-name" class="input" type="text" maxlength="14" autocomplete="off"
+                 autocapitalize="words" placeholder="e.g. Luna" />
+        </label>
+
+        <button class="btn btn-yellow btn-lg" id="btn-create">
+          <span class="btn-emoji">✨</span> Make a room
+        </button>
+        <button class="btn btn-blue btn-lg" id="btn-goto-join">
+          <span class="btn-emoji">🔑</span> Join with a code
+        </button>
+      </div>
+
+      <p class="footnote">One phone each · joining picks up the host's game</p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  JOIN  ───────────────────────── -->
+  <section class="screen" id="screen-join">
+    <div class="stack">
+      <button class="btn-back" data-back="screen-home">‹ Back</button>
+
+      <div class="card">
+        <h2 class="card-title">Room code</h2>
+        <p class="card-sub">Ask the host for their four letters</p>
+
+        <div class="code-entry" id="code-entry">
+          <input class="code-box" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" aria-label="Code letter 1" />
+          <input class="code-box" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" aria-label="Code letter 2" />
+          <input class="code-box" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" aria-label="Code letter 3" />
+          <input class="code-box" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" aria-label="Code letter 4" />
+        </div>
+
+        <button class="btn btn-yellow btn-lg" id="btn-join">
+          <span class="btn-emoji">🚪</span> Let me in
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  LOBBY  ───────────────────────── -->
+  <section class="screen" id="screen-lobby">
+    <div class="stack">
+      <div class="code-banner">
+        <span class="code-banner-label" id="lobby-game-label">Room code</span>
+        <button class="code-banner-code" id="btn-copy-code" title="Tap to copy">
+          <span id="lobby-code">····</span>
+          <span class="copy-hint">tap to copy</span>
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="row-between">
+          <h2 class="card-title" id="lobby-count">Waiting…</h2>
+          <span class="pill" id="lobby-you"></span>
+        </div>
+        <ul class="players" id="player-list"></ul>
+      </div>
+
+      <div class="card card-soft" id="host-panel" hidden>
+        <h3 class="card-title sm" id="lineup-title">Tonight's line-up</h3>
+        <div class="role-chips" id="role-preview"></div>
+
+        <div id="duration-row" hidden>
+          <span class="field-label">Round length</span>
+          <div class="seg" id="duration-seg"></div>
+        </div>
+
+        <button class="btn btn-yellow btn-lg" id="btn-start">
+          <span class="btn-emoji">🎬</span> <span id="start-label">Deal the roles</span>
+        </button>
+        <p class="hint" id="start-hint">Need at least 4 players</p>
+        <button class="btn-ghost" id="btn-switch-game">Switch game</button>
+      </div>
+
+      <div class="card card-soft" id="guest-panel">
+        <div class="waiting">
+          <div class="bouncer">🐱</div>
+          <p id="guest-waiting-text">Hang tight — the host is gathering everyone.</p>
+        </div>
+      </div>
+
+      <button class="btn-ghost" id="btn-leave">Leave room</button>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  REVEAL  ───────────────────────── -->
+  <section class="screen screen-reveal" id="screen-reveal">
+    <div class="stack stack-center">
+      <p class="reveal-kicker" id="reveal-kicker">Your role is ready</p>
+
+      <div class="chest-stage">
+        <div class="glow" id="chest-glow"></div>
+        <button class="chest" id="chest" aria-label="Open your chest">
+          <div class="chest-lid">
+            <div class="lid-face">
+              <span class="band band-l"></span>
+              <span class="band band-r"></span>
+              <span class="lid-strip"></span>
+            </div>
+          </div>
+          <div class="chest-base">
+            <span class="band band-l"></span>
+            <span class="band band-r"></span>
+            <span class="belt"></span>
+            <span class="clasp">💛</span>
+          </div>
+          <div class="chest-shadow"></div>
+        </button>
+        <p class="chest-tap" id="chest-tap">tap to open</p>
+      </div>
+
+      <div class="role-card" id="role-card" hidden>
+        <span class="role-rarity" id="role-rarity">ROLE</span>
+        <div class="role-emoji" id="role-emoji">🌻</div>
+        <h2 class="role-name" id="role-name">Villager</h2>
+        <p class="role-desc" id="role-desc"></p>
+        <div class="role-team" id="role-team"></div>
+        <div class="role-mates" id="role-mates" hidden></div>
+      </div>
+
+      <div class="reveal-banner" id="location-reveal" hidden></div>
+
+      <div class="timer" id="timer" hidden>
+        <span class="timer-label">Time left</span>
+        <span class="timer-clock" id="timer-clock">8:00</span>
+      </div>
+
+      <button class="btn btn-blue btn-lg" id="btn-hide-role" hidden>
+        <span class="btn-emoji">🙈</span> Hide it, someone's looking
+      </button>
+
+      <button class="btn-ghost" id="btn-open-locations" hidden>🗺️ See every location</button>
+      <button class="btn-ghost" id="btn-gm" hidden>Game master panel ›</button>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  LOCATIONS  ───────────────────────── -->
+  <section class="screen" id="screen-locations">
+    <div class="stack">
+      <button class="btn-back" id="btn-close-locations">‹ Back</button>
+
+      <div class="card">
+        <h2 class="card-title">Every location</h2>
+        <p class="card-sub">Tap one to cross it off — private to your phone.</p>
+        <div class="loc-grid" id="loc-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  GAME MASTER  ───────────────────────── -->
+  <section class="screen" id="screen-gm">
+    <div class="stack">
+      <div class="code-banner slim">
+        <span class="code-banner-label">Game master</span>
+        <span class="code-banner-code static" id="gm-code">····</span>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Who's in play</h2>
+        <div class="role-chips" id="gm-roles"></div>
+        <p class="hint" id="gm-hint">Only counts — nobody's secret is spoiled.</p>
+      </div>
+
+      <div class="card card-soft" id="gm-timer-card" hidden>
+        <h3 class="card-title sm">Round timer</h3>
+        <div class="timer big">
+          <span class="timer-clock" id="gm-clock">8:00</span>
+        </div>
+        <button class="btn btn-yellow" id="btn-timer">
+          <span class="btn-emoji">▶️</span> <span id="timer-label">Start the round</span>
+        </button>
+        <button class="btn-ghost" id="btn-reveal-location">Reveal the location to everyone</button>
+      </div>
+
+      <div class="card card-soft" id="gm-script">
+        <h3 class="card-title sm" id="gm-script-title">Night order</h3>
+        <ol class="steps" id="gm-steps"></ol>
+      </div>
+
+      <div class="card card-soft">
+        <button class="btn btn-yellow" id="btn-reshuffle">
+          <span class="btn-emoji">🔄</span> Deal again
+        </button>
+        <button class="btn-ghost" id="btn-end">End game &amp; back to lobby</button>
+      </div>
+
+      <button class="btn-ghost" id="btn-gm-myrole">Peek at my own role</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
