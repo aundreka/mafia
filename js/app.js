@@ -88,7 +88,11 @@ async function init() {
   }
 
   window.addEventListener('beforeunload', () => {
-    if (me.code && !leaving) removePlayer(me.code, me.id);
+    if (!me.code || leaving) return;
+    // Closing the tab as the last one here would otherwise strand an empty
+    // room in the database forever — nobody is left to clean it up.
+    if (playerList().length <= 1) deleteRoom(me.code);
+    else removePlayer(me.code, me.id);
   });
 }
 
@@ -265,6 +269,12 @@ async function joinRoom() {
     if (!target) return toast(`No room called ${code}`);
 
     const players = target.players || {};
+    // A husk left behind by a crashed host: sweep it and report it as gone,
+    // rather than dropping someone into an empty room with a dead host id.
+    if (Object.keys(players).length === 0) {
+      await deleteRoom(code);
+      return toast(`No room called ${code}`);
+    }
     const max = gameOf(target.game).meta.max;
     if (!players[me.id]) {
       if (target.status === 'playing') return toast('That game already started 🎬');
@@ -345,7 +355,14 @@ function onRoomChange(next) {
 
   room = next;
 
-  if (!room.players?.[me.id]) {
+  // An empty husk — every player vanished without anyone tidying up.
+  if (!room.players || Object.keys(room.players).length === 0) {
+    deleteRoom(room.code || me.code);
+    goHome();
+    return;
+  }
+
+  if (!room.players[me.id]) {
     toast('You left the room');
     goHome();
     return;
