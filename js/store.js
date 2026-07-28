@@ -2,8 +2,8 @@
    Room storage.
 
    Two interchangeable backends behind one tiny API:
-     • cloud — Firebase Realtime Database (real cross-device play)
-     • local — localStorage + BroadcastChannel (multi-tab testing)
+     • cloud: Firebase Realtime Database (real cross-device play)
+     • local: localStorage + BroadcastChannel (multi-tab testing)
 
    Room shape:
    {
@@ -34,14 +34,14 @@ function withTimeout(promise, label) {
 }
 
 export async function initStore() {
-  // ?local=1 forces the offline backend — handy for testing without
+  // ?local=1 forces the offline backend, handy for testing without
   // touching a real database.
   const forceLocal = new URLSearchParams(location.search).has('local');
 
   if (!forceLocal && isConfigured()) {
     try {
       backend = await withTimeout(cloudBackend(), 'Firebase SDK did not load');
-      await withTimeout(backend.probe(), 'Database did not answer — are the rules published?');
+      await withTimeout(backend.probe(), 'Database did not answer, are the rules published?');
       mode = 'cloud';
       return mode;
     } catch (err) {
@@ -58,13 +58,13 @@ export async function initStore() {
 function friendlyError(err) {
   const text = String(err?.message || err);
   if (/permission_denied|Permission denied/i.test(text)) {
-    return 'Firebase said permission denied — publish database.rules.json in the Rules tab.';
+    return 'Firebase said permission denied, publish database.rules.json in the Rules tab.';
   }
   if (/did not answer/i.test(text)) {
     return 'Could not reach your database. Check databaseURL in config.js and that the rules are published.';
   }
   if (/did not load/i.test(text)) {
-    return 'Could not download the Firebase SDK — check your internet connection.';
+    return 'Could not download the Firebase SDK, check your internet connection.';
   }
   return `Firebase error: ${text}`;
 }
@@ -114,13 +114,12 @@ async function cloudBackend() {
     onDisconnectRemove(code, id) {
       rtdb.onDisconnect(rtdb.ref(db, `rooms/${code}/players/${id}`)).remove();
     },
-    // Registered on the server, so it still fires when a tab is killed —
-    // a beforeunload delete never survives long enough to reach Firebase.
+    // Registered on the server, so it still fires when a tab is killed, // a beforeunload delete never survives long enough to reach Firebase.
     async onDisconnectRoom(code, on, playerId) {
       const od = rtdb.onDisconnect(roomRef(code));
       if (on) return od.remove();
       // cancel() clears handlers at this path AND below it, so the player's
-      // own removal handler goes with it — put that one back.
+      // own removal handler goes with it, put that one back.
       await od.cancel();
       if (playerId) {
         await rtdb.onDisconnect(rtdb.ref(db, `rooms/${code}/players/${playerId}`)).remove();

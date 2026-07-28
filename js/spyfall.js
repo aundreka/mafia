@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------
-   Spyfall — everyone shares a location except the spies, who have to
+   Spyfall: everyone shares a location except the spies, who have to
    work out where they are before the room works out who they are.
 ------------------------------------------------------------------- */
 
@@ -21,8 +21,7 @@ export const DURATIONS = [6, 8, 10];
 export const DEFAULT_DURATION = 8;
 
 /* ── locations ────────────────────────────────────────────────────
-   Two packs, concatenated. Delete either array to drop that pack —
-   nothing else references them by name.
+   Two packs, concatenated. Delete either array to drop that pack, nothing else references them by name.
 ------------------------------------------------------------------ */
 
 export const CLASSIC = [
@@ -61,7 +60,7 @@ export const PINOY = [
 
 export const LOCATIONS = [...CLASSIC, ...PINOY];
 
-/** Spies scale gently — one for a small table, more once the room is loud. */
+/** Spies scale gently, one for a small table, more once the room is loud. */
 export function spyCount(n) {
   if (n <= 8) return 1;
   if (n <= 13) return 2;
@@ -126,7 +125,7 @@ export function clear(players) {
   return patch;
 }
 
-/** Where this round is set — read off whichever player is not a spy. */
+/** Where this round is set, read off whichever player is not a spy. */
 export function locationOf(players) {
   return players.find((p) => p.place)?.place || null;
 }
@@ -135,12 +134,34 @@ export function lookup(name) {
   return LOCATIONS.find((l) => l.name === name);
 }
 
+/* Shown on the How to play screen, for people who have never played. */
+export const howto = {
+  goal: 'Everyone is at the same place and has a job there. Everyone except the spy, who has no idea where they are. The spy is trying to work out the location. Everyone else is trying to work out who the spy is.',
+  sections: [
+    { icon: '📱', title: 'Look at your card',
+      body: 'Open the chest on your own phone. If it names a place, that is where you are and what you do there. If it says Spy, you get nothing and you have to fake it.' },
+    { icon: '💬', title: 'Take turns asking questions',
+      body: 'The host starts the timer. Somebody asks anyone a question about the place, like "what are you wearing right now?" or "would you bring a kid here?" That person answers, then they get to ask the next question, to anybody they like.' },
+    { icon: '🎭', title: 'The whole trick',
+      body: 'Answer so the others can tell you belong, but stay vague enough that the spy cannot figure out where you are. The spy has to bluff their answers while listening hard for clues.' },
+    { icon: '🗺️', title: 'The location list',
+      body: 'Every player can open the full list of places from their reveal screen and cross off the ones that no longer fit. It is private to your phone, so nobody sees what you have ruled out.' },
+    { icon: '🚨', title: 'Ending the round',
+      body: 'Anyone can accuse another player, but every remaining player has to agree before the vote counts. At any moment the spy can stop everything and name the location.' }
+  ],
+  win: [
+    { who: '🕵️ The spy wins', how: 'by naming the location correctly, or by surviving until the timer runs out.' },
+    { who: '📍 Everyone else wins', how: 'by getting the group to vote out the spy.' }
+  ],
+  tip: 'A question that is too easy helps the spy. A question that is too clever makes you look like the spy. Somewhere in between is where the game lives.'
+};
+
 export const stepsTitle = 'How a round goes';
 export const steps = [
   '<b>Start the timer</b>, then pick someone to ask first.',
-  '<b>Ask one question</b> about the place — "what are you wearing?", "would you bring a kid here?"',
+  '<b>Ask one question</b> about the place: "what are you wearing?", "would you bring a kid here?"',
   'They answer, then <b>they ask the next person</b>. Round and round.',
-  '<b>Anyone can accuse</b> — but everyone else has to agree before the vote counts.',
+  '<b>Anyone can accuse</b>, but everyone else has to agree before the vote counts.',
   '<b>The spy can guess</b> the location at any moment to end the round.'
 ];
 
@@ -156,7 +177,7 @@ export function card(me) {
       team: 'You are alone',
       color: '#7562DE',
       deep: '#4B43A8',
-      extra: 'Guess the location any time to end the round — <b>get it right and you win</b>.'
+      extra: 'Guess the location any time to end the round. <b>Get it right and you win.</b>'
     };
   }
 
@@ -167,7 +188,7 @@ export function card(me) {
     rarity: 'LOCATION',
     emoji: place?.emoji || '📍',
     title: me.place,
-    desc: 'Answer questions like you really work here — but not so clearly that the spy figures it out.',
+    desc: 'Answer questions like you really work here, but not so clearly that the spy figures it out.',
     team: `You are the ${me.job}`,
     color: '#2E96DC',
     deep: '#1F79BC',

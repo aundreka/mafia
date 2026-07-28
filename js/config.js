@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------------
    Firebase Realtime Database config.
 
-   These values are safe to commit and safe to serve publicly — a Firebase
+   These values are safe to commit and safe to serve publicly, a Firebase
    web config identifies the project, it does not grant access. What actually
    protects the data is database.rules.json, so publish those rules in the
    Realtime Database → Rules tab before sharing the site around.

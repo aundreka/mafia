@@ -1,6 +1,6 @@
 /* Small helpers shared by the game modules and the app shell. */
 
-/** Cryptographically-seeded Fisher–Yates. Returns a new array. */
+/** Cryptographically-seeded Fisher-Yates. Returns a new array. */
 export function shuffle(arr) {
   const a = arr.slice();
   if (a.length < 2) return a;

@@ -1,5 +1,5 @@
 /* ============================================================
-   Mafia Night — chunky, rounded, storybook-bright.
+   Mafia Night: chunky, rounded, storybook-bright.
    Palette lifted from the reference art: sky blue + gold + cream.
    ============================================================ */
 
@@ -370,6 +370,46 @@ body {
 .game-tag { font-weight: 700; font-size: 13px; color: var(--ink-soft); }
 .game-players { font-weight: 700; font-size: 11px; letter-spacing: 1px; color: #A9BACD; text-transform: uppercase; margin-top: 3px; }
 
+/* ── how to play ──────────────────────────────────────────── */
+.howto-goal {
+  margin: 0; font-weight: 600; font-size: 17px; line-height: 1.45; color: var(--ink);
+}
+.howto-count {
+  margin: 0; font-weight: 800; font-size: 13px; letter-spacing: 1px;
+  text-transform: uppercase; color: #A9BACD;
+}
+
+#howto-sections { display: flex; flex-direction: column; gap: 14px; }
+
+.howto-step {
+  gap: 8px;
+  animation: popIn .4s cubic-bezier(.2,.9,.3,1.4) both;
+}
+.howto-head { display: flex; align-items: center; gap: 11px; }
+.howto-icon {
+  font-size: 26px; flex: none;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--cream);
+  display: grid; place-items: center;
+}
+.howto-body {
+  margin: 0; font-weight: 600; font-size: 16px; line-height: 1.45; color: var(--ink-soft);
+}
+
+.howto-wins { display: flex; flex-direction: column; gap: 10px; }
+.howto-win {
+  margin: 0; font-weight: 600; font-size: 16px; line-height: 1.4; color: #7A6644;
+}
+.howto-win b { color: var(--ink); }
+.howto-tip {
+  margin: 0; font-weight: 600; font-size: 16px; line-height: 1.45; color: #7A6644;
+}
+
+/* the picker on the how-to screen is a compact two-up toggle */
+#howto-picker .game-tile { padding: 12px 10px 11px; }
+#howto-picker .game-emoji { font-size: 30px; }
+#howto-picker .game-name { font-size: 18px; }
+
 /* ── segmented control ────────────────────────────────────── */
 .seg { display: grid; grid-auto-flow: column; gap: 8px; margin-top: 8px; }
 
@@ -451,7 +491,7 @@ body {
 }
 
 /* ============================================================
-   REVEAL — treasure chest
+   REVEAL: treasure chest
    ============================================================ */
 .screen-reveal .stack { gap: 14px; }
 

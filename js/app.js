@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------
-   App shell — game picker, lobby sync, dealing and reveal.
+   App shell: game picker, lobby sync, dealing and reveal.
    The game-specific bits all live behind the modules in games.js.
 ------------------------------------------------------------------- */
 
@@ -23,8 +23,7 @@ const HEARTBEAT_MS = 8000;
 const STALE_MS     = 40000;
 
 /* In cloud mode identity lives in localStorage, so a refresh drops you back
-   into your room. In local test mode it lives in sessionStorage instead —
-   otherwise every tab on this machine would be the same player. */
+   into your room. In local test mode it lives in sessionStorage instead, otherwise every tab on this machine would be the same player. */
 const identity = isConfigured() ? localStorage : sessionStorage;
 
 const me = {
@@ -56,13 +55,13 @@ async function init() {
   if (mode === 'local') {
     const flag = $('#mode-flag');
     if (storeError) {
-      // Keys are filled in but the database would not talk to us — say so
+      // Keys are filled in but the database would not talk to us, say so
       // loudly, otherwise phones silently fail to see each other.
       flag.classList.add('warn');
-      flag.textContent = '⚠️ OFFLINE — other phones will not see your room';
+      flag.textContent = '⚠️ OFFLINE: other phones will not see your room';
       toast(storeError, 9000);
     } else {
-      flag.textContent = 'LOCAL TEST MODE — open a second tab to play along';
+      flag.textContent = 'LOCAL TEST MODE: open a second tab to play along';
     }
     flag.hidden = false;
   }
@@ -70,6 +69,7 @@ async function init() {
   $('#input-name').value = me.name;
 
   wireHome();
+  wireHowTo();
   wireJoin();
   wireLobby();
   wireReveal();
@@ -86,12 +86,16 @@ async function init() {
   if (hashCode.length === 4) {
     show('screen-join');
     fillCodeBoxes(hashCode);
+  } else if (!localStorage.getItem('mafia:seen-howto')) {
+    // First time on this phone: show the rules before anything else.
+    localStorage.setItem('mafia:seen-howto', '1');
+    openHowTo(pickedGame);
   }
 
   window.addEventListener('beforeunload', () => {
     if (!me.code || leaving) return;
     // Closing the tab as the last one here would otherwise strand an empty
-    // room in the database forever — nobody is left to clean it up.
+    // room in the database forever, nobody is left to clean it up.
     if (playerList().length <= 1) deleteRoom(me.code);
     else removePlayer(me.code, me.id);
   });
@@ -148,6 +152,64 @@ function paintGamePicker() {
   $('.tagline').textContent = GAMES[pickedGame].meta.tagline;
 }
 
+/* ── how to play ──────────────────────────────────────────── */
+
+let howToGame = DEFAULT_GAME;
+
+function wireHowTo() {
+  $('#btn-howto').addEventListener('click', () => openHowTo(pickedGame));
+  $('#btn-close-howto').addEventListener('click', () => show('screen-home'));
+  $('#btn-howto-done').addEventListener('click', () => {
+    // Reading about a game is a good signal you want to play that one.
+    pickedGame = howToGame;
+    identity.setItem('mafia:game', pickedGame);
+    paintGamePicker();
+    show('screen-home');
+  });
+
+  $$('#howto-picker .game-tile').forEach((tile) =>
+    tile.addEventListener('click', () => openHowTo(tile.dataset.game))
+  );
+}
+
+function openHowTo(key) {
+  howToGame = GAMES[key] ? key : DEFAULT_GAME;
+  const g = GAMES[howToGame];
+
+  $$('#howto-picker .game-tile').forEach((t) =>
+    t.classList.toggle('is-picked', t.dataset.game === howToGame)
+  );
+
+  $('#howto-title').textContent = `How to play ${g.meta.name}`;
+  $('#howto-goal').textContent = g.howto.goal;
+  $('#howto-count').textContent = `${g.meta.min} to ${g.meta.max} players · one phone each`;
+  $('#howto-tip').textContent = g.howto.tip;
+
+  const sections = $('#howto-sections');
+  sections.innerHTML = '';
+  g.howto.sections.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'card howto-step';
+    card.innerHTML =
+      `<div class="howto-head"><span class="howto-icon">${s.icon}</span>
+         <h3 class="card-title sm">${escapeHtml(s.title)}</h3></div>
+       <p class="howto-body">${escapeHtml(s.body)}</p>`;
+    card.style.animationDelay = `${i * 60}ms`;
+    sections.append(card);
+  });
+
+  const wins = $('#howto-win');
+  wins.innerHTML = '';
+  for (const w of g.howto.win) {
+    const row = document.createElement('p');
+    row.className = 'howto-win';
+    row.innerHTML = `<b>${escapeHtml(w.who)}</b> ${escapeHtml(w.how)}`;
+    wins.append(row);
+  }
+
+  show('screen-howto');
+}
+
 function requireName() {
   if (me.name.length >= 1) return true;
   toast('Pop your name in first 🙂');
@@ -178,7 +240,7 @@ async function createRoom() {
     await enterRoom(code);
   } catch (err) {
     console.error(err);
-    toast('Could not make a room — check your connection.');
+    toast('Could not make a room, check your connection.');
   } finally {
     btn.disabled = false;
   }
@@ -291,7 +353,7 @@ async function joinRoom() {
     await enterRoom(code);
   } catch (err) {
     console.error(err);
-    toast('Could not join — check your connection.');
+    toast('Could not join, check your connection.');
   } finally {
     btn.disabled = false;
   }
@@ -307,7 +369,7 @@ async function enterRoom(code) {
   aloneHere = null;
   history.replaceState(null, '', `#${code}`);
 
-  // Paint the code before the first snapshot lands — otherwise the host
+  // Paint the code before the first snapshot lands, otherwise the host
   // stares at the placeholder dots for as long as the round trip takes.
   $('#lobby-code').textContent = code;
   $('#gm-code').textContent = code;
@@ -357,7 +419,7 @@ function onRoomChange(next) {
 
   room = next;
 
-  // An empty husk — every player vanished without anyone tidying up.
+  // An empty husk, every player vanished without anyone tidying up.
   if (!room.players || Object.keys(room.players).length === 0) {
     deleteRoom(room.code || me.code);
     goHome();
@@ -447,7 +509,7 @@ async function copyCode() {
   const code = me.code || '';
   try {
     await navigator.clipboard.writeText(code);
-    toast(`Copied ${code} — go share it 📋`);
+    toast(`Copied ${code}, go share it 📋`);
   } catch {
     toast(`Room code: ${code}`);
   }
@@ -508,7 +570,7 @@ function renderLobby() {
   $('#host-panel').hidden = !host;
   $('#guest-panel').hidden = host;
   $('#guest-waiting-text').textContent =
-    `Hang tight — the host is setting up ${g.meta.name}.`;
+    `Hang tight, the host is setting up ${g.meta.name}.`;
 
   if (host) {
     const short = g.meta.min - players.length;
@@ -692,7 +754,7 @@ function tickTimer() {
 
   if (room.timerEndsAt && left === 0 && !tickTimer._fired) {
     tickTimer._fired = true;
-    toast('⏰ Time’s up — the spy survives unless you catch them now!', 4000);
+    toast('⏰ Time’s up, the spy survives unless you catch them now!', 4000);
   }
   if (left > 0) tickTimer._fired = false;
 }
@@ -736,8 +798,8 @@ function renderGameMaster() {
   renderChips($('#gm-roles'), g.inPlay(playerList()));
   $('#gm-timer-card').hidden = !spyfall;
   $('#gm-hint').textContent = spyfall
-    ? 'The location stays hidden here too — so a host who drew Spy can’t cheat.'
-    : 'Only counts — nobody’s secret is spoiled.';
+    ? 'The location stays hidden here too, so a host who drew Spy can’t cheat.'
+    : 'Only counts, nobody’s secret is spoiled.';
 
   $('#gm-script-title').textContent = g.stepsTitle;
   const steps = $('#gm-steps');

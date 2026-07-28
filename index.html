@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
 <meta name="theme-color" content="#4FB8F0" />
-<title>Party Night — Mafia &amp; Spyfall</title>
+<title>Party Night: Mafia &amp; Spyfall</title>
 <meta name="description" content="Cute party games. Make a room, share the code, everyone gets a secret role." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,13 +39,13 @@
           <span class="game-emoji">🎭</span>
           <span class="game-name">Mafia</span>
           <span class="game-tag">Find the killers</span>
-          <span class="game-players">4–20 players</span>
+          <span class="game-players">4-20 players</span>
         </button>
         <button class="game-tile" data-game="spyfall">
           <span class="game-emoji">🕵️</span>
           <span class="game-name">Spyfall</span>
           <span class="game-tag">Guess the place</span>
-          <span class="game-players">3–20 players</span>
+          <span class="game-players">3-20 players</span>
         </button>
       </div>
 
@@ -64,7 +64,49 @@
         </button>
       </div>
 
+      <button class="btn-ghost" id="btn-howto">📖 New to this? How to play</button>
+
       <p class="footnote">One phone each · joining picks up the host's game</p>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  HOW TO PLAY  ───────────────────────── -->
+  <section class="screen" id="screen-howto">
+    <div class="stack">
+      <button class="btn-back" id="btn-close-howto">‹ Back</button>
+
+      <div class="game-picker" id="howto-picker">
+        <button class="game-tile is-picked" data-game="mafia">
+          <span class="game-emoji">🎭</span>
+          <span class="game-name">Mafia</span>
+        </button>
+        <button class="game-tile" data-game="spyfall">
+          <span class="game-emoji">🕵️</span>
+          <span class="game-name">Spyfall</span>
+        </button>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title" id="howto-title">How to play</h2>
+        <p class="howto-goal" id="howto-goal"></p>
+        <p class="howto-count" id="howto-count"></p>
+      </div>
+
+      <div id="howto-sections"></div>
+
+      <div class="card card-soft">
+        <h3 class="card-title sm">How you win</h3>
+        <div class="howto-wins" id="howto-win"></div>
+      </div>
+
+      <div class="card card-soft">
+        <h3 class="card-title sm">💡 One bit of advice</h3>
+        <p class="howto-tip" id="howto-tip"></p>
+      </div>
+
+      <button class="btn btn-yellow btn-lg" id="btn-howto-done">
+        <span class="btn-emoji">👍</span> Got it, let's play
+      </button>
     </div>
   </section>
 
@@ -129,7 +171,7 @@
       <div class="card card-soft" id="guest-panel">
         <div class="waiting">
           <div class="bouncer">🐱</div>
-          <p id="guest-waiting-text">Hang tight — the host is gathering everyone.</p>
+          <p id="guest-waiting-text">Hang tight, the host is gathering everyone.</p>
         </div>
       </div>
 
@@ -195,7 +237,7 @@
 
       <div class="card">
         <h2 class="card-title">Every location</h2>
-        <p class="card-sub">Tap one to cross it off — private to your phone.</p>
+        <p class="card-sub">Tap one to cross it off, private to your phone.</p>
         <div class="loc-grid" id="loc-grid"></div>
       </div>
     </div>
@@ -212,7 +254,7 @@
       <div class="card">
         <h2 class="card-title">Who's in play</h2>
         <div class="role-chips" id="gm-roles"></div>
-        <p class="hint" id="gm-hint">Only counts — nobody's secret is spoiled.</p>
+        <p class="hint" id="gm-hint">Only counts, nobody's secret is spoiled.</p>
       </div>
 
       <div class="card card-soft" id="gm-timer-card" hidden>
