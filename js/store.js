@@ -80,7 +80,8 @@ export const setPlayer     = (code, id, p)     => backend.update(code, { [`playe
 export const removePlayer  = (code, id)        => backend.update(code, { [`players/${id}`]: null });
 export const watchDisconnect = (code, id)      => backend.onDisconnectRemove?.(code, id);
 /** Arm/disarm server-side deletion of the whole room if this client vanishes. */
-export const watchRoomDisconnect = (code, on)  => backend.onDisconnectRoom?.(code, on);
+export const watchRoomDisconnect = (code, on, playerId) =>
+  backend.onDisconnectRoom?.(code, on, playerId);
 
 /* ── Firebase Realtime Database ───────────────────────────── */
 
@@ -115,9 +116,15 @@ async function cloudBackend() {
     },
     // Registered on the server, so it still fires when a tab is killed —
     // a beforeunload delete never survives long enough to reach Firebase.
-    onDisconnectRoom(code, on) {
+    async onDisconnectRoom(code, on, playerId) {
       const od = rtdb.onDisconnect(roomRef(code));
-      return on ? od.remove() : od.cancel();
+      if (on) return od.remove();
+      // cancel() clears handlers at this path AND below it, so the player's
+      // own removal handler goes with it — put that one back.
+      await od.cancel();
+      if (playerId) {
+        await rtdb.onDisconnect(rtdb.ref(db, `rooms/${code}/players/${playerId}`)).remove();
+      }
     },
     // Reads an empty room slot to prove the rules let us in. Uses a
     // four-character code because database.rules.json only opens up

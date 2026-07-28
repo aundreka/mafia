@@ -377,7 +377,7 @@ function onRoomChange(next) {
   const alone = stillHere.length === 1 && stillHere[0].id === me.id;
   if (alone !== aloneHere) {
     aloneHere = alone;
-    watchRoomDisconnect(me.code, alone);
+    watchRoomDisconnect(me.code, alone, me.id);
   }
 
   if (!room.players[room.hostId] && stillHere.length) {
