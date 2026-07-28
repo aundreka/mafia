@@ -5,7 +5,7 @@
 
 import {
   initStore, mode, storeError, getRoom, setRoom, updateRoom, deleteRoom,
-  subscribeRoom, setPlayer, removePlayer, watchDisconnect
+  subscribeRoom, setPlayer, removePlayer, watchDisconnect, watchRoomDisconnect
 } from './store.js';
 import { GAMES, GAME_KEYS, DEFAULT_GAME, gameOf } from './games.js';
 import { LOCATIONS, DURATIONS, DEFAULT_DURATION } from './spyfall.js';
@@ -41,6 +41,7 @@ let revealed = false;
 let lastStatus = null;
 let lastRound = null;
 let leaving = false;
+let aloneHere = null;
 let crossedOff = new Set();
 
 const game = () => gameOf(room?.game || pickedGame);
@@ -303,6 +304,7 @@ async function enterRoom(code) {
   revealed = false;
   lastStatus = null;
   lastRound = null;
+  aloneHere = null;
   history.replaceState(null, '', `#${code}`);
 
   // Paint the code before the first snapshot lands — otherwise the host
@@ -369,6 +371,15 @@ function onRoomChange(next) {
   }
 
   const stillHere = playerList();
+
+  // While I'm the only one here, ask the server to bin the whole room if I
+  // drop off. Cancel the moment someone else arrives.
+  const alone = stillHere.length === 1 && stillHere[0].id === me.id;
+  if (alone !== aloneHere) {
+    aloneHere = alone;
+    watchRoomDisconnect(me.code, alone);
+  }
+
   if (!room.players[room.hostId] && stillHere.length) {
     if (stillHere[0].id === me.id) updateRoom(me.code, { hostId: me.id });
     return;

@@ -79,6 +79,8 @@ export const subscribeRoom = (code, cb)        => backend.subscribe(code, cb);
 export const setPlayer     = (code, id, p)     => backend.update(code, { [`players/${id}`]: p });
 export const removePlayer  = (code, id)        => backend.update(code, { [`players/${id}`]: null });
 export const watchDisconnect = (code, id)      => backend.onDisconnectRemove?.(code, id);
+/** Arm/disarm server-side deletion of the whole room if this client vanishes. */
+export const watchRoomDisconnect = (code, on)  => backend.onDisconnectRoom?.(code, on);
 
 /* ── Firebase Realtime Database ───────────────────────────── */
 
@@ -110,6 +112,12 @@ async function cloudBackend() {
     },
     onDisconnectRemove(code, id) {
       rtdb.onDisconnect(rtdb.ref(db, `rooms/${code}/players/${id}`)).remove();
+    },
+    // Registered on the server, so it still fires when a tab is killed —
+    // a beforeunload delete never survives long enough to reach Firebase.
+    onDisconnectRoom(code, on) {
+      const od = rtdb.onDisconnect(roomRef(code));
+      return on ? od.remove() : od.cancel();
     },
     // Reads an empty room slot to prove the rules let us in. Uses a
     // four-character code because database.rules.json only opens up
